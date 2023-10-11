@@ -1,8 +1,15 @@
 const API_BASE_URL = 'https://api.themoviedb.org/3/';
+const API_CONFIG = {
+    method: 'GET',
+    headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${API_KEY_BEARER}`,
+    }
+};
+const API_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w300';
 const TRENDING_ALL_DAY = 'trending/all/day';
 const TRENDING_ALL_WEEK = 'trending/all/week';
 const GENRE_MOVIES = 'genre/movie/list'
-const API_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w300';
 const DISCOVER_MOVIES = 'discover/movie'
 
 
@@ -12,6 +19,9 @@ function createMovies(movies, container){
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
+        movieContainer.addEventListener('click', () =>{
+             
+        })
 
         const movieImg = document.createElement('img');
         movieImg.classList.add('movie-img');
@@ -47,13 +57,7 @@ function createCategories(categories, container){
 }
 
 async function getCategoriesPreview() {
-    const res = await fetch(`${API_BASE_URL}${GENRE_MOVIES}`, {
-        method: 'GET',
-        headers: {
-            accept: 'application/json;charset=utf-8',
-            Authorization: `Bearer ${API_KEY_BEARER}`,
-        },
-    })
+    const res = await fetch(`${API_BASE_URL}${GENRE_MOVIES}`, API_CONFIG)
     const data = await res.json();
     console.log(data, 'esta es la data de categories')
     //ya que el objeto anterior simplemente contiene 'genres' se lo asigno a la variable y empiezo a acceder sus propiedades internas;
@@ -71,12 +75,5 @@ async function getAndAppendMovies(api_url, api_config, parentContainer, id) {
     createMovies(movies, parentContainer)
 }
 
-const API_CONFIG = {
-    method: 'GET',
-    headers: {
-        accept: 'application/json',
-        Authorization: `Bearer ${API_KEY_BEARER}`,
-    }
-};
 
 
