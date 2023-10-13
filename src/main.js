@@ -7,8 +7,8 @@ const API_CONFIG = {
     }
 };
 const API_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w300';
-const TRENDING_ALL_DAY = 'trending/all/day';
-const TRENDING_ALL_WEEK = 'trending/all/week';
+const TRENDING_ALL_DAY = 'trending/movie/day';
+const TRENDING_ALL_WEEK = 'trending/movie/week';
 const GENRE_MOVIES = 'genre/movie/list'
 const DISCOVER_MOVIES = 'discover/movie'
 
@@ -19,7 +19,10 @@ function createMovies(movies, container){
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
+        movieTitle = movie.title;
         movieContainer.addEventListener('click', () =>{
+             movieURL = `#movie=${movie.id}`
+             location.hash = movieURL;
              
         })
 
@@ -75,5 +78,33 @@ async function getAndAppendMovies(api_url, api_config, parentContainer, id) {
     createMovies(movies, parentContainer)
 }
 
+async function getMovieById(id){
+    const res = await fetch(`${API_BASE_URL}movie/${id}`, API_CONFIG);
+    const data = await res.json();
+    const movieImgURL = `https://image.tmdb.org/t/p/w500${data.poster_path}`
+    console.log(data)
+    
+    headerSection.style.background = `linear-gradient(
+        180deg, 
+        rgba(0, 0, 0, 0.35) 19.27%, 
+        rgba(0, 0, 0, 0) 29.17%
+        ), url(${movieImgURL})`
 
+    movieDetailTitle.textContent = data.title;
+    movieDetailDescription.textContent = data.overview;
+    movieDetailScore.textContent = data.vote_average.toFixed(1);
+
+    createCategories(data.genres, movieDetailCategoriesList);
+    getRelatedMoviesByID(id);
+}
+
+async function getRelatedMoviesByID(id){
+    const res = await fetch(`${API_BASE_URL}movie/${id}/recommendations`, API_CONFIG);
+    const data = await res.json();
+    console.log(data, 'data')
+    const relatedMovies = data.results;
+    console.log(relatedMovies, 'relatedMovies')
+    createMovies(relatedMovies, relatedMoviesContainer)
+
+}
 
