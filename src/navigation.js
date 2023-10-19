@@ -50,7 +50,7 @@ function homePage() {
   
 
   //trends section
-  getAndAppendMovies(`${API_BASE_URL}${TRENDING_ALL_DAY}`, API_CONFIG, trendingMoviesPreviewList);
+  getAndAppendMovies(`${API_BASE_URL}${TRENDING_ALL_DAY}`, API_CONFIG, trendingMoviesPreviewList, undefined, true);
   getCategoriesPreview();
   
 }
@@ -81,7 +81,7 @@ function categoriesPage() {
   //getMoviesByCategory(categoryId);
 
   //get movies by category
-  getAndAppendMovies(`${API_BASE_URL}${DISCOVER_MOVIES}?language=en-US&page=1&with_genres=${categoryId}`, API_CONFIG, genericSection, categoryId);
+  getAndAppendMovies(`${API_BASE_URL}${DISCOVER_MOVIES}?language=en-US&page=1&with_genres=${categoryId}`, API_CONFIG, genericSection, categoryId, true);
 }
 
 function movieDetailsPage() {
@@ -127,7 +127,7 @@ function searchPage() {
 
   // ['#search', 'query'];
   const [_, query] = location.hash.split('=');
-  getAndAppendMovies(`${API_BASE_URL}/search/movie?query=${query}`, API_CONFIG, genericSection);
+  getAndAppendMovies(`${API_BASE_URL}/search/movie?query=${query}`, API_CONFIG, genericSection, undefined, true);
 }
 
 function trendsPage() {
@@ -149,5 +149,5 @@ function trendsPage() {
   genericSection.classList.remove('inactive')
   movieDetailSection.classList.add('inactive');
 
-  getAndAppendMovies(`${API_BASE_URL}${TRENDING_ALL_DAY}`, API_CONFIG, genericSection);
+  getAndAppendMovies(`${API_BASE_URL}${TRENDING_ALL_DAY}`, API_CONFIG, genericSection, undefined, true);
 }

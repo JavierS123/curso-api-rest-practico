@@ -13,7 +13,18 @@ const GENRE_MOVIES = 'genre/movie/list'
 const DISCOVER_MOVIES = 'discover/movie'
 
 
-function createMovies(movies, container){
+//Lazy loading optimization
+const lazyLoader = new IntersectionObserver(
+    (entries) =>{
+    entries.forEach((entry) =>{
+        if(entry.isIntersecting){
+            const url = entry.target.getAttribute('data-img');
+            entry.target.setAttribute('src', url)
+        }
+    })
+})
+//el parametro lazyLoad es para poder alternar si quieres seccionas con lazyload o no.
+function createMovies(movies, container, lazyLoad){
     container.innerHTML = "";
     
     movies.forEach(movie => {
@@ -22,7 +33,7 @@ function createMovies(movies, container){
         movieTitle = movie.title;
         movieContainer.addEventListener('click', () =>{
              movieURL = `#movie=${movie.id}`
-             location.hash = movieURL;
+             location.hash = movieURL; 
              
         })
 
@@ -30,9 +41,11 @@ function createMovies(movies, container){
         movieImg.classList.add('movie-img');
         movieImg.setAttribute('alt', movie.title);
         movieImg.setAttribute(
-            'src',
+            lazyLoad ? 'data-img' : 'src',
             `${API_IMAGE_BASE_URL}${movie.poster_path}`)
-
+        if (lazyLoad){
+            lazyLoader.observe(movieImg);
+        }
         movieContainer.appendChild(movieImg);
         container.appendChild(movieContainer);
     })
@@ -68,14 +81,15 @@ async function getCategoriesPreview() {
     createCategories(categories, categoriesPreviewList);
 }
 
-async function getAndAppendMovies(api_url, api_config, parentContainer, id) {
+//el parametro lazyLoad es para poder alternar si quieres secciones con lazyload o no.
+async function getAndAppendMovies(api_url, api_config, parentContainer, id, lazyLoad = false) {
     const res = await fetch(api_url, api_config);
     const data = await res.json();
     //llamado a la api, almacenas la respuesta en data
     console.log(data) // para ver la estructura de la respuesta
     const movies = data.results
 
-    createMovies(movies, parentContainer)
+    createMovies(movies, parentContainer, lazyLoad)
 }
 
 async function getMovieById(id){
