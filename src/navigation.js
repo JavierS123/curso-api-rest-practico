@@ -149,5 +149,5 @@ function trendsPage() {
   genericSection.classList.remove('inactive')
   movieDetailSection.classList.add('inactive');
 
-  getAndAppendMovies(`${API_BASE_URL}${TRENDING_ALL_DAY}`, API_CONFIG, genericSection, undefined, true);
+  getPaginatedTrendingMovies(genericSection, 1)
 }

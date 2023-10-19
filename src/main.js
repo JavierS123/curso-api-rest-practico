@@ -2,8 +2,8 @@ const API_BASE_URL = 'https://api.themoviedb.org/3/';
 const API_CONFIG = {
     method: 'GET',
     headers: {
-        accept: 'application/json',
         Authorization: `Bearer ${API_KEY_BEARER}`,
+        accept: 'application/json',
     }
 };
 const API_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w300';
@@ -23,9 +23,12 @@ const lazyLoader = new IntersectionObserver(
         }
     })
 })
-//el parametro lazyLoad es para poder alternar si quieres seccionas con lazyload o no.
-function createMovies(movies, container, lazyLoad){
-    container.innerHTML = "";
+//el parametro lazyLoad es para poder alternar si quieres secciones con lazyload
+//clean es para limpiar el html
+function createMovies(movies, container, lazyLoad, clean = true){
+    if (clean){
+        container.innerHTML = "";
+    }
     
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
@@ -122,3 +125,21 @@ async function getRelatedMoviesByID(id){
 
 }
 
+async function getPaginatedTrendingMovies(container, page = 1){
+    const res = await fetch(`${API_BASE_URL}${TRENDING_ALL_DAY}?page=${page}`, API_CONFIG);
+    const data = await res.json();
+    console.log(data, 'paginated trending data');
+    const paginatedMovies = data.results;
+    
+    createMovies(paginatedMovies, container, true, page == 1)
+
+    const btnLoadMore = document.createElement('button');
+    btnLoadMore.innerText = "Load more"
+    btnLoadMore.classList.add('trendingPreview-btn')
+    btnLoadMore.style.margin = "0 auto"
+    btnLoadMore.addEventListener('click', () =>{
+        btnLoadMore.remove();
+        getPaginatedTrendingMovies(genericSection, page += 1)
+    })
+    container.appendChild(btnLoadMore)
+}
