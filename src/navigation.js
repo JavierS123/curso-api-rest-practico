@@ -12,6 +12,12 @@ arrowBtn.addEventListener('click', () => {
 window.addEventListener('DOMContentLoaded', navigator, false);
 window.addEventListener('hashchange', navigator, false);
 
+let infiniteScroll;
+let page = 1;
+let maxPage;
+let isPageNotMax = page < maxPage;
+
+
 function navigator() {
   console.log({ location });
 
@@ -44,6 +50,7 @@ function homePage() {
 
 
   trendingPreviewSection.classList.remove('inactive');
+  likedMoviesSection.classList.remove('inactive');
   categoriesPreviewSection.classList.remove('inactive');
   genericSection.classList.add('inactive')
   movieDetailSection.classList.add('inactive');
@@ -52,6 +59,7 @@ function homePage() {
   //trends section
   getAndAppendMovies(`${API_BASE_URL}${TRENDING_ALL_DAY}`, API_CONFIG, trendingMoviesPreviewList, undefined, true);
   getCategoriesPreview();
+  getLikedMovies();
   
 }
 
@@ -69,6 +77,7 @@ function categoriesPage() {
 
 
   trendingPreviewSection.classList.add('inactive');
+  likedMoviesSection.classList.add('inactive');
   categoriesPreviewSection.classList.add('inactive');
   genericSection.classList.remove('inactive')
   movieDetailSection.classList.add('inactive');
@@ -97,6 +106,7 @@ function movieDetailsPage() {
   arrowBtn.classList.add('header-arrow--white');
 
   trendingPreviewSection.classList.add('inactive');
+  likedMoviesSection.classList.add('inactive');
   categoriesPreviewSection.classList.add('inactive');
   genericSection.classList.add('inactive')
   movieDetailSection.classList.remove('inactive');
@@ -121,6 +131,7 @@ function searchPage() {
 
 
   trendingPreviewSection.classList.add('inactive');
+  likedMoviesSection.classList.add('inactive');
   categoriesPreviewSection.classList.add('inactive');
   genericSection.classList.remove('inactive')
   movieDetailSection.classList.add('inactive');
@@ -145,9 +156,18 @@ function trendsPage() {
 
 
   trendingPreviewSection.classList.add('inactive');
+  likedMoviesSection.classList.add('inactive');
   categoriesPreviewSection.classList.add('inactive');
   genericSection.classList.remove('inactive')
   movieDetailSection.classList.add('inactive');
 
   getPaginatedTrendingMovies(genericSection, 1)
+  infiniteScroll = getPaginatedTrendingMovies;
+  window.addEventListener('scroll', ()=> {
+
+    if((document.documentElement.scrollTop + document.documentElement.clientHeight) >= (document.documentElement.scrollHeight - 15) && location.hash.startsWith('#trends') && page < maxPage){
+      infiniteScroll(genericSection, page);
+      page += 1;
+    }
+  }, false)
 }

@@ -15,30 +15,45 @@ const DISCOVER_MOVIES = 'discover/movie'
 
 //Lazy loading optimization
 const lazyLoader = new IntersectionObserver(
-    (entries) =>{
-    entries.forEach((entry) =>{
-        if(entry.isIntersecting){
-            const url = entry.target.getAttribute('data-img');
-            entry.target.setAttribute('src', url)
-        }
+    (entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const url = entry.target.getAttribute('data-img');
+                entry.target.setAttribute('src', url)
+            }
+        })
     })
-})
+
+function likedMoviesList() {
+    const item = JSON.parse(localStorage.getItem('liked_movies'));
+    let movies;
+    if (item) {
+        movies = item;
+    } else {
+        movies = {}
+    }
+    return movies
+}
+function likeMovie(movie) {
+    const likedMovies = likedMoviesList();
+    if (likedMovies[movie.id]) {
+        likedMovies[movie.id] = undefined;
+    } else {
+        likedMovies[movie.id] = movie;
+    }
+    localStorage.setItem('liked_movies',JSON.stringify(likedMovies));
+}
 //el parametro lazyLoad es para poder alternar si quieres secciones con lazyload
 //clean es para limpiar el html
-function createMovies(movies, container, lazyLoad, clean = true){
-    if (clean){
+function createMovies(movies, container, lazyLoad, clean = true) {
+    if (clean) {
         container.innerHTML = "";
     }
-    
+
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
         movieTitle = movie.title;
-        movieContainer.addEventListener('click', () =>{
-             movieURL = `#movie=${movie.id}`
-             location.hash = movieURL; 
-             
-        })
 
         const movieImg = document.createElement('img');
         movieImg.classList.add('movie-img');
@@ -46,15 +61,33 @@ function createMovies(movies, container, lazyLoad, clean = true){
         movieImg.setAttribute(
             lazyLoad ? 'data-img' : 'src',
             `${API_IMAGE_BASE_URL}${movie.poster_path}`)
-        if (lazyLoad){
+
+        movieImg.addEventListener('click', () => {
+            movieURL = `#movie=${movie.id}`
+            location.hash = movieURL;
+        })
+
+        const movieBtn = document.createElement('button');
+        movieBtn.classList.add('movie-btn');
+
+        likedMoviesList()[movie.id] && movieBtn.classList.add('movie-btn--liked')
+        movieBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            movieBtn.classList.toggle('movie-btn--liked');
+            likeMovie(movie);
+            getLikedMovies();
+        })
+        if (lazyLoad) {
             lazyLoader.observe(movieImg);
         }
+
         movieContainer.appendChild(movieImg);
+        movieContainer.appendChild(movieBtn)
         container.appendChild(movieContainer);
     })
 }
 
-function createCategories(categories, container){
+function createCategories(categories, container) {
     container.innerHTML = '';
 
     categories.forEach(category => {
@@ -95,12 +128,12 @@ async function getAndAppendMovies(api_url, api_config, parentContainer, id, lazy
     createMovies(movies, parentContainer, lazyLoad)
 }
 
-async function getMovieById(id){
+async function getMovieById(id) {
     const res = await fetch(`${API_BASE_URL}movie/${id}`, API_CONFIG);
     const data = await res.json();
     const movieImgURL = `https://image.tmdb.org/t/p/w500${data.poster_path}`
     console.log(data)
-    
+
     headerSection.style.background = `linear-gradient(
         180deg, 
         rgba(0, 0, 0, 0.35) 19.27%, 
@@ -115,7 +148,7 @@ async function getMovieById(id){
     getRelatedMoviesByID(id);
 }
 
-async function getRelatedMoviesByID(id){
+async function getRelatedMoviesByID(id) {
     const res = await fetch(`${API_BASE_URL}movie/${id}/recommendations`, API_CONFIG);
     const data = await res.json();
     console.log(data, 'data')
@@ -125,21 +158,36 @@ async function getRelatedMoviesByID(id){
 
 }
 
-async function getPaginatedTrendingMovies(container, page = 1){
+async function getPaginatedTrendingMovies(container, page = 1) {
+
+
     const res = await fetch(`${API_BASE_URL}${TRENDING_ALL_DAY}?page=${page}`, API_CONFIG);
     const data = await res.json();
     console.log(data, 'paginated trending data');
     const paginatedMovies = data.results;
-    
+    maxPage = data.total_pages;
+    console.log(maxPage)
     createMovies(paginatedMovies, container, true, page == 1)
 
-    const btnLoadMore = document.createElement('button');
+    
+
+    /*const btnLoadMore = document.createElement('button');
     btnLoadMore.innerText = "Load more"
     btnLoadMore.classList.add('trendingPreview-btn')
     btnLoadMore.style.margin = "0 auto"
-    btnLoadMore.addEventListener('click', () =>{
+    btnLoadMore.addEventListener('click', () => {
         btnLoadMore.remove();
         getPaginatedTrendingMovies(genericSection, page += 1)
     })
-    container.appendChild(btnLoadMore)
+    container.appendChild(btnLoadMore)*/
+}
+
+function getLikedMovies(){
+    const likedMovies = likedMoviesList();
+    
+    const moviesArray = Object.values(likedMovies);
+
+    createMovies(moviesArray, likedMoviesListContainer, true, true)
+    console.log(likedMovies)
+    console.log('se ejecuta getlikedmovies');
 }
